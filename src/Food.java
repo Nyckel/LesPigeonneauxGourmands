@@ -2,10 +2,14 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
+import com.sun.javafx.geom.BaseBounds;
+import com.sun.javafx.geom.transform.BaseTransform;
+import com.sun.javafx.jmx.MXNodeAlgorithm;
+import com.sun.javafx.sg.prism.NGNode;
+import com.sun.javafx.jmx.MXNodeAlgorithmContext;
+import javafx.scene.Node;
 
-public class Food {
-
-
+public class Food extends Node {
     private static int incrementId = 0;
     private static Image image;
     private static double imageShiftX;
@@ -13,14 +17,13 @@ public class Food {
     private static Image imageOutdated;
     private static double imageOutdatedShiftX;
     private static double imageOutdatedShiftY;
-
     private int id;
-    private double x;
-    private double y;
+    private int x;
+    private int y;
     private boolean fresh;
     private ImageView view;
 
-    public Food(double px, double py) {
+    public Food(int px, int py) {
         id = incrementId++;
         x = px;
         y = py;
@@ -63,7 +66,7 @@ public class Food {
     }
 
     public ImageView getView() {return view;}
-    public int getId() {return id;}
+    public int getFoodId() {return id;}
     public double getX() {return x;}
     public double getY() {return y;}
     public boolean isFresh() {return fresh;}
@@ -76,5 +79,28 @@ public class Food {
         imageShiftY = img.getHeight() / 2;
         imageOutdatedShiftX = imgO.getWidth() / 2;
         imageOutdatedShiftY = imgO.getHeight() / 2;
+    }
+    public synchronized void getEaten(int pigeonId) {
+        fireEvent(new FoodEvent(FoodEvent.FOOD_EATEN, pigeonId));
+    }
+
+    @Override
+    protected NGNode impl_createPeer() {
+        return null;
+    }
+
+    @Override
+    public BaseBounds impl_computeGeomBounds(BaseBounds bounds, BaseTransform tx) {
+        return null;
+    }
+
+    @Override
+    protected boolean impl_computeContains(double localX, double localY) {
+        return false;
+    }
+
+    @Override
+    public Object impl_processMXNode(MXNodeAlgorithm alg, MXNodeAlgorithmContext ctx) {
+        return null;
     }
 }
