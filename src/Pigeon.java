@@ -1,6 +1,8 @@
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.ArrayList;
+
 public class Pigeon extends Thread {
 
     private static int incrementId = 0;
@@ -14,14 +16,18 @@ public class Pigeon extends Thread {
     private double y;
     private ImageView view;
     private volatile Boolean shouldRun;
-
+    private ArrayList<Food> foods;
+    private Food currentObjective;
 
     public Pigeon(double px, double py) {
         id = incrementId++;
         x = px;
         y = py;
         shouldRun = true;
+        foods = new ArrayList<Food>();
+        currentObjective = null;
         System.out.println("Creating pigeon at position " + px + ";" + py + "/" + x + " ; " + y);
+
 
         view = new ImageView();
         view.setImage(image);
@@ -33,11 +39,17 @@ public class Pigeon extends Thread {
 
     public void run() {
         while(shouldRun) {
+
+            // Check for danger
+
+            if (currentObjective != null)
+            {
 //            System.out.println("Pigeon " + id + " alive at " + x + " ; " + y);
-            // Check for new food at interval ...
-            // Then move towards it
+                // Move towards food
 
 //            updateViewPosition();
+            }
+
             try {
                 Thread.sleep(500);
             } catch(InterruptedException e) {
@@ -64,6 +76,47 @@ public class Pigeon extends Thread {
         image = img;
         imageShiftX = img.getWidth() / 2;
         imageShiftY = img.getHeight() / 2;
+    }
 
+    public void notifyNewFood(Food f) {
+        foods.add(f);
+        searchClosestFood();
+    }
+
+    public void notifyFoodEaten(int id) {
+        removeFood(id);
+        searchClosestFood();
+    }
+
+    public void notifyFoodOutdated(int id) {
+        removeFood(id);
+        searchClosestFood();
+    }
+
+    private void removeFood(int id) {
+        for (Food e: foods)
+        {
+            if (e.getId() == id)
+            {
+                foods.remove(e);
+                break;
+            }
+
+        }
+    }
+
+    private void searchClosestFood() {
+        Food f = null;
+        double distanceMin = Double.MAX_VALUE;
+        double distance;
+
+        for (Food e: foods) {
+            distance = Math.sqrt(Math.pow(x - e.getX(), 2) + Math.pow(y - e.getY(), 2));
+            if (distance < distanceMin) {
+                f = e;
+                distanceMin = distance;
+            }
+        }
+        currentObjective = f;
     }
 }

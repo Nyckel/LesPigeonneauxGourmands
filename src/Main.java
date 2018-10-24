@@ -16,9 +16,11 @@ public class Main extends Application {
     private final static int WINDOW_WIDTH = 500;
     private final static int WINDOW_HEIGHT = 500;
     private ArrayList<Pigeon> pigeons;
+    private ArrayList<Food> foods;
 
     public Main() {
         pigeons = new ArrayList<Pigeon>();
+        foods = new ArrayList<Food>();
     }
 
     @Override
@@ -32,6 +34,12 @@ public class Main extends Application {
         Image image = new Image(imagePath);
         Pigeon.setImage(image);
 
+        String imagePathFood = "file:resources/food.gif";
+        Image imageFood = new Image(imagePathFood);
+        String imageOutdatedPathFood = "file:resources/foodOutdated.gif";
+        Image imageOutdatedFood = new Image(imageOutdatedPathFood);
+        Food.setImages(imageFood, imageOutdatedFood);
+
         Scene scene = new Scene(layout, Color.CADETBLUE);
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
             @Override
@@ -42,7 +50,10 @@ public class Main extends Application {
                     pig.start();
                     pigeons.add(pig);
                 } else if (mouseEvent.getButton() == MouseButton.SECONDARY) {
-                    // Add food
+                    Food f = new Food(mouseEvent.getX(), mouseEvent.getY());
+                    layout.getChildren().add(f.getView());
+                    foods.add(f);
+                    // Alerts pigeons
                 }
             }
         });
