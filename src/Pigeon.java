@@ -6,7 +6,8 @@ import java.util.ArrayList;
 public class Pigeon extends Thread {
 
     private static int incrementId = 0;
-    private static Image image;
+    private static Image imageLeft;
+    private static Image imageRight;
     private static double imageShiftX;
     private static double imageShiftY;
     private static final int speed = 5;
@@ -18,6 +19,7 @@ public class Pigeon extends Thread {
     private volatile Boolean shouldRun;
     private ArrayList<Food> foods;
     private Food currentObjective;
+    private boolean directionLeft;
 
     public Pigeon(double px, double py) {
         id = incrementId++;
@@ -26,14 +28,15 @@ public class Pigeon extends Thread {
         shouldRun = true;
         foods = new ArrayList<Food>();
         currentObjective = null;
+        directionLeft = true;
         System.out.println("Creating pigeon at position " + px + ";" + py + "/" + x + " ; " + y);
 
 
         view = new ImageView();
-        view.setImage(image);
+        view.setImage(imageLeft);
         view.setX(x - imageShiftX);
         view.setY(y - imageShiftY);
-        view.setFitHeight(image.getHeight());
+        view.setFitHeight(imageLeft.getHeight());
         view.setPreserveRatio(true);
     }
 
@@ -68,11 +71,19 @@ public class Pigeon extends Thread {
 
                         if (currentObjective.getX() > x)
                         {
+                            if (directionLeft) {
+                                directionLeft = false;
+                                view.setImage(imageRight);
+                            }
                             x += Math.cos(angle) * speed;
                             y += Math.sin(angle) * speed;
                         }
                         else
                         {
+                            if (!directionLeft) {
+                                directionLeft = true;
+                                view.setImage(imageLeft);
+                            }
                             x -= Math.cos(angle) * speed;
                             y -= Math.sin(angle) * speed;
                         }
@@ -103,10 +114,11 @@ public class Pigeon extends Thread {
         return view;
     }
 
-    public static void setImage(Image img) {
-        image = img;
-        imageShiftX = img.getWidth() / 2;
-        imageShiftY = img.getHeight() / 2;
+    public static void setImage(Image imgLeft, Image imgRight) {
+        imageLeft = imgLeft;
+        imageRight = imgRight;
+        imageShiftX = imgLeft.getWidth() / 2;
+        imageShiftY = imgLeft.getHeight() / 2;
     }
 
     public void notifyFoodPop(Food f) {

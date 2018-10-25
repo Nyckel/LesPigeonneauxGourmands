@@ -58,6 +58,7 @@ public class Food extends Node {
             view.setX(x - imageOutdatedShiftX);
             view.setY(y - imageOutdatedShiftY);
             view.setFitHeight(imageOutdated.getHeight()/2);
+            getOutdated();
         }
     }
 
@@ -78,5 +79,8 @@ public class Food extends Node {
     }
     public synchronized void getEaten(int pigeonId) {
         fireEvent(new FoodEvent(FoodEvent.FOOD_EATEN, pigeonId));
+    }
+    public synchronized void getOutdated() {
+        fireEvent(new FoodEvent(FoodEvent.FOOD_OUTDATED));
     }
 }
