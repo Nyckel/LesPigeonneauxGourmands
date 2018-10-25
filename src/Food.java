@@ -41,6 +41,7 @@ public class Food {
             @Override
             public void run() {
                 setFresh(false);
+                timer.cancel();
             }
         }, 2000);
     }
