@@ -103,19 +103,23 @@ public class Main extends Application {
     private void addFood(Pane layout, int x, int y) {
         Food f = new Food(x, y);
         layout.getChildren().add(f.getView());
-        foods.add(f);
-        // Alerts pigeons
-
-        f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
-            @Override
-            public void handle(FoodEvent fe) {
-                for (Pigeon p : pigeons) {
-                    p.notifyFoodEaten(f.getFoodId());
-                }
-            }
-        });
-
         synchronized (lockMonitor) {
+
+            f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
+                @Override
+                public void handle(FoodEvent fe) {
+                    Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
+                        @Override public void run() {
+                            layout.getChildren().remove(f.getView());
+                            for (Pigeon p : pigeons) {
+                                p.notifyFoodEaten(f.getFoodId());
+                            }
+                        }
+                    });
+                }
+            });
+
+            foods.add(f);
             for (Pigeon p : pigeons) {
                 p.notifyFoodPop(f);
             }
