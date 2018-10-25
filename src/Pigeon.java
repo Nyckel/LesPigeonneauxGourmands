@@ -96,7 +96,7 @@ public class Pigeon extends Thread {
     private void removeFood(int id) {
         for (Food e: foods)
         {
-            if (e.getId() == id)
+            if (e.getFoodId() == id)
             {
                 foods.remove(e);
                 break;
