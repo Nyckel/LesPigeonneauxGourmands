@@ -129,7 +129,7 @@ public class Main extends Application {
                     }
                 }
             });
-
+            
             foods.add(f);
             for (Pigeon p : pigeons) {
                 p.notifyFoodPop(f);
