@@ -2,11 +2,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.sg.prism.NGNode;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
 import javafx.scene.Node;
 
 public class Food extends Node {
@@ -76,32 +71,12 @@ public class Food extends Node {
         image = img;
         imageOutdated = imgO;
 
-        imageShiftX = img.getWidth() / 2;
-        imageShiftY = img.getHeight() / 2;
-        imageOutdatedShiftX = imgO.getWidth() / 2;
-        imageOutdatedShiftY = imgO.getHeight() / 2;
+        imageShiftX = img.getWidth() / 4;
+        imageShiftY = img.getHeight() / 4;
+        imageOutdatedShiftX = imgO.getWidth() / 4;
+        imageOutdatedShiftY = imgO.getHeight() / 4;
     }
     public synchronized void getEaten(int pigeonId) {
         fireEvent(new FoodEvent(FoodEvent.FOOD_EATEN, pigeonId));
-    }
-
-    @Override
-    protected NGNode impl_createPeer() {
-        return null;
-    }
-
-    @Override
-    public BaseBounds impl_computeGeomBounds(BaseBounds bounds, BaseTransform tx) {
-        return null;
-    }
-
-    @Override
-    protected boolean impl_computeContains(double localX, double localY) {
-        return false;
-    }
-
-    @Override
-    public Object impl_processMXNode(MXNodeAlgorithm alg, MXNodeAlgorithmContext ctx) {
-        return null;
     }
 }

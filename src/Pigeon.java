@@ -44,14 +44,45 @@ public class Pigeon extends Thread {
 
             if (currentObjective != null)
             {
-//            System.out.println("Pigeon " + id + " alive at " + x + " ; " + y);
+                System.out.println("Pigeon " + id + " alive at " + x + " ; " + y);
+                System.out.println("Objective at " + currentObjective.getX() + " ; " + currentObjective.getY());
                 // Move towards food
+                if (Math.sqrt(Math.pow(x - currentObjective.getX(), 2) + Math.pow(y - currentObjective.getY(), 2)) < speed)
+                {
+                    x = currentObjective.getX();
+                    y = currentObjective.getY();
+                    currentObjective.getEaten(id);
+                    searchClosestFood();
+                }
+                else
+                {
+                    if (currentObjective.getX() == x)
+                    {
+                        if (currentObjective.getY() > y)
+                            y += speed;
+                        else
+                            y -= speed;
+                    }
+                    else {
+                        double angle = Math.atan((currentObjective.getY()-y)/(currentObjective.getX()-x));
 
-//            updateViewPosition();
+                        if (currentObjective.getX() > x)
+                        {
+                            x += Math.cos(angle) * speed;
+                            y += Math.sin(angle) * speed;
+                        }
+                        else
+                        {
+                            x -= Math.cos(angle) * speed;
+                            y -= Math.sin(angle) * speed;
+                        }
+                    }
+                }
+                updateViewPosition();
             }
 
             try {
-                Thread.sleep(500);
+                Thread.sleep(50);
             } catch(InterruptedException e) {
                 System.out.println("Was interrupted");
             }
@@ -78,7 +109,7 @@ public class Pigeon extends Thread {
         imageShiftY = img.getHeight() / 2;
     }
 
-    public void notifyNewFood(Food f) {
+    public void notifyFoodPop(Food f) {
         foods.add(f);
         searchClosestFood();
     }

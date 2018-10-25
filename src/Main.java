@@ -89,6 +89,11 @@ public class Main extends Application {
         Pigeon pig = new Pigeon(x, y);
 
         synchronized (lockMonitor) {
+            for (Food f: foods) {
+                if (f.isFresh())
+                    pig.notifyFoodPop(f);
+            }
+
             layout.getChildren().add(pig.getView());
             pig.start();
             pigeons.add(pig);
@@ -104,13 +109,15 @@ public class Main extends Application {
         f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
             @Override
             public void handle(FoodEvent fe) {
-                // NotifyFoodEaten
+                for (Pigeon p : pigeons) {
+                    p.notifyFoodEaten(f.getFoodId());
+                }
             }
         });
 
         synchronized (lockMonitor) {
             for (Pigeon p : pigeons) {
-//                p.notifyFoodPop(food);
+                p.notifyFoodPop(f);
             }
         }
     }
