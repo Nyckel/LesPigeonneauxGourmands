@@ -37,9 +37,11 @@ public class Main extends Application {
         Pane layout = new Pane();
         layout.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
-        String imagePath = "file:resources/pigeon_right.gif";
-        Image image = new Image(imagePath);
-        Pigeon.setImage(image);
+        String imagePathLeft = "file:resources/pigeon_left.gif";
+        Image imageLeft = new Image(imagePathLeft);
+        String imagePathRight = "file:resources/pigeon_right.gif";
+        Image imageRight = new Image(imagePathRight);
+        Pigeon.setImage(imageLeft, imageRight);
 
         String imagePathFood = "file:resources/food.gif";
         Image imageFood = new Image(imagePathFood);
@@ -95,6 +97,11 @@ public class Main extends Application {
         Pigeon pig = new Pigeon(x, y);
 
         synchronized (lockMonitor) {
+            for (Food f: foods) {
+                if (f.isFresh())
+                    pig.notifyFoodPop(f);
+            }
+
             layout.getChildren().add(pig.getView());
             pig.start();
             pigeons.add(pig);
@@ -104,19 +111,34 @@ public class Main extends Application {
     private void addFood(Pane layout, int x, int y) {
         Food f = new Food(x, y);
         layout.getChildren().add(f.getView());
-        foods.add(f);
-        // Alerts pigeons
-
-        f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
-            @Override
-            public void handle(FoodEvent fe) {
-                // NotifyFoodEaten
-            }
-        });
-
         synchronized (lockMonitor) {
+
+            f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
+                @Override
+                public void handle(FoodEvent fe) {
+                    Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
+                        @Override public void run() {
+                            layout.getChildren().remove(f.getView());
+                            for (Pigeon p : pigeons) {
+                                p.notifyFoodEaten(f.getFoodId());
+                            }
+                        }
+                    });
+                }
+            });
+
+            f.addEventHandler(FoodEvent.FOOD_OUTDATED, new EventHandler<FoodEvent>() {
+                @Override
+                public void handle(FoodEvent fe) {
+                    for (Pigeon p : pigeons) {
+                        p.notifyFoodOutdated(f.getFoodId());
+                    }
+                }
+            });
+            
+            foods.add(f);
             for (Pigeon p : pigeons) {
-//                p.notifyFoodPop(food);
+                p.notifyFoodPop(f);
             }
         }
     }
