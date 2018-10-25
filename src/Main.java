@@ -1,7 +1,10 @@
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -10,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Main extends Application {
 
@@ -18,7 +22,6 @@ public class Main extends Application {
     private final Object lockMonitor = new Object();
     private ArrayList<Pigeon> pigeons;
     private ArrayList<Food> foods;
-
 
     public Main() {
         pigeons = new ArrayList<Pigeon>();
@@ -42,6 +45,10 @@ public class Main extends Application {
         Image imageOutdatedFood = new Image(imageOutdatedPathFood);
         Food.setImages(imageFood, imageOutdatedFood);
 
+        String imagePathRock = "file:resources/rock.png";
+        Image imageRock = new Image(imagePathRock);
+        Rock.setImage(imageRock);
+
         Scene scene = new Scene(layout, Color.CADETBLUE);
         scene.addEventFilter(MouseEvent.MOUSE_PRESSED, new EventHandler<MouseEvent>() {
             @Override
@@ -50,6 +57,14 @@ public class Main extends Application {
                     addPigeon(layout, (int) mouseEvent.getX(), (int)mouseEvent.getY());
                 } else if (mouseEvent.getButton() == MouseButton.SECONDARY) {
                     addFood(layout, (int) mouseEvent.getX(), (int) mouseEvent.getY());
+                }
+            }
+        });
+        scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
+            @Override
+            public void handle(KeyEvent event) {
+                if (event.getCode() == KeyCode.SPACE){
+                    addRock(layout);
                 }
             }
         });
@@ -68,6 +83,7 @@ public class Main extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
     }
+
 
     private void addPigeon(Pane layout, int x, int y) {
         Pigeon pig = new Pigeon(x, y);
@@ -97,6 +113,19 @@ public class Main extends Application {
 //                p.notifyFoodPop(food);
             }
         }
+    }
+
+    private void addRock(Pane layout)
+    {
+        double x = randomNumberInRange(10, 490);
+        double y = randomNumberInRange(10, 490);
+        Rock rock = new Rock(x, y);
+        layout.getChildren().add(rock.getView());
+    }
+
+    private static int randomNumberInRange(int min, int max) {
+        Random random = new Random();
+        return random.nextInt((max - min) + 1) + min;
     }
 
     public static void main(String[] args) {
