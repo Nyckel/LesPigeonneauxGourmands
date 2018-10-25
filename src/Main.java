@@ -22,10 +22,12 @@ public class Main extends Application {
     private final Object lockMonitor = new Object();
     private ArrayList<Pigeon> pigeons;
     private ArrayList<Food> foods;
+    private ArrayList<Rock> rocks;
 
     public Main() {
         pigeons = new ArrayList<Pigeon>();
         foods = new ArrayList<Food>();
+        rocks = new ArrayList<Rock>();
     }
 
     @Override
@@ -60,11 +62,15 @@ public class Main extends Application {
                 }
             }
         });
+
         scene.addEventFilter(KeyEvent.KEY_PRESSED, new EventHandler<KeyEvent>() {
             @Override
             public void handle(KeyEvent event) {
-                if (event.getCode() == KeyCode.SPACE){
-                    addRock(layout);
+                if (event.getCode() == KeyCode.SPACE) {
+                    if (!(rocks.size() < 2))
+                        System.out.println("Two rocks are already on the screen");
+                    else
+                        addRock(layout);
                 }
             }
         });
@@ -120,7 +126,29 @@ public class Main extends Application {
         double x = randomNumberInRange(10, 490);
         double y = randomNumberInRange(10, 490);
         Rock rock = new Rock(x, y);
-        layout.getChildren().add(rock.getView());
+
+        // EventListener pour l'affichage et le stockage de la pierre
+        rock.addEventHandler(RockEvent.CREATION, new EventHandler<RockEvent>() {
+            @Override
+            public void handle(RockEvent rc) {
+                System.out.println("Affichage du rock");
+                layout.getChildren().add(rock.getView());
+                rocks.add(rock);
+            }
+        });
+
+        rock.addEventHandler(RockEvent.TIMEOUT, new EventHandler<RockEvent>() {
+            @Override
+            public void handle(RockEvent rs) {
+                System.out.println("Supression du rock");
+                Platform.runLater(()-> {
+                    layout.getChildren().remove(rock.getView());
+                });
+                rocks.remove(rock);
+            }
+        });
+
+        rock.run(); // lancement du thread
     }
 
     private static int randomNumberInRange(int min, int max) {
