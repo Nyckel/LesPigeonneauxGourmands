@@ -1,3 +1,4 @@
+import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
@@ -75,8 +76,7 @@ public class Pigeon extends Thread {
     }
 
     private void moveTowardObjective() {
-        if (Math.sqrt(Math.pow(x - currentObjective.getX(), 2) + Math.pow(y - currentObjective.getY(), 2)) < speed)
-        {
+        if (Math.sqrt(Math.pow(x - currentObjective.getX(), 2) + Math.pow(y - currentObjective.getY(), 2)) < speed) {
             x = currentObjective.getX();
             y = currentObjective.getY();
             if (currentObjective.isFresh())
@@ -84,39 +84,33 @@ public class Pigeon extends Thread {
             else
                 currentObjective.getOutdated();
             searchClosestFood();
-        }
-        else
-        {
-            if (currentObjective.getX() == x)
-            {
+        } else {
+            if (currentObjective.getX() == x) {
                 if (currentObjective.getY() > y)
                     y += speed;
                 else
                     y -= speed;
-            }
-            else {
-                double angle = Math.atan((currentObjective.getY()-y)/(currentObjective.getX()-x));
+            } else {
+                double angle = Math.atan((currentObjective.getY() - y) / (currentObjective.getX() - x));
 
-                if (currentObjective.getX() > x)
-                {
+                if (currentObjective.getX() > x) {
                     if (directionLeft) {
                         directionLeft = false;
-                        view.setImage(imageRight);
+                        changeDirection();
                     }
                     x += Math.cos(angle) * speed;
                     y += Math.sin(angle) * speed;
-                }
-                else
-                {
+                } else {
                     if (!directionLeft) {
                         directionLeft = true;
-                        view.setImage(imageLeft);
+                        changeDirection();
                     }
                     x -= Math.cos(angle) * speed;
                     y -= Math.sin(angle) * speed;
                 }
             }
         }
+
     }
 
     private void runAwayFromRock() {
@@ -134,7 +128,7 @@ public class Pigeon extends Thread {
             {
                 if (! directionLeft) {
                     directionLeft = true;
-                    view.setImage(imageLeft);
+                    changeDirection();
                 }
                 x = Math.min(Math.max(0, x - Math.cos(angle) * speed), MAXPOSITIONX);
                 y = Math.min(Math.max(0, y - Math.sin(angle) * speed), MAXPOSITIONY);
@@ -143,7 +137,7 @@ public class Pigeon extends Thread {
             {
                 if (directionLeft) {
                     directionLeft = false;
-                    view.setImage(imageRight);
+                    changeDirection();
                 }
                 x = Math.min(Math.max(0, x + Math.cos(angle) * speed), MAXPOSITIONX);
                 y = Math.min(Math.max(0, y + Math.sin(angle) * speed), MAXPOSITIONY);
@@ -151,9 +145,18 @@ public class Pigeon extends Thread {
         }
     }
 
+    private void changeDirection() {
+        Platform.runLater(() -> {
+            view.setImage(directionLeft ? imageLeft : imageRight);
+        });
+    }
+
     private void updateViewPosition() {
-        view.setX(x - imageShiftX);
-        view.setY(y - imageShiftY);
+        Platform.runLater(()-> {
+            view.setX(x - imageShiftX);
+            view.setY(y - imageShiftY);
+        });
+
     }
 
     public void stopRunning() {
@@ -172,19 +175,16 @@ public class Pigeon extends Thread {
     }
 
     public synchronized void notifyFoodPop(Food f) {
-//        System.out.println("Pigeon_"+ id + " food pop " + f.getFoodId());
         foods.add(f);
         searchClosestFood();
     }
 
     public synchronized void notifyFoodEaten(int pid) {
-//        System.out.println("Pigeon_"+ id + " food eaten " + pid);
         removeFood(pid);
         searchClosestFood();
     }
 
     public synchronized void notifyFoodOutdated(int pid) {
-//        System.out.println("Pigeon_"+ id + " food rotten " + pid);
         removeFood(pid);
         searchClosestFood();
     }
@@ -199,6 +199,7 @@ public class Pigeon extends Thread {
     }
 
     private synchronized void searchClosestFood() {
+
         Food f = null;
         double distanceMin = Double.MAX_VALUE;
         double distance;
@@ -211,7 +212,6 @@ public class Pigeon extends Thread {
             }
         }
         currentObjective = f;
-//        System.out.println("Pigeon_"+ id + " search..." + currentObjective);
         if (currentObjective == null) {
             System.out.println(foods.size());
         }
