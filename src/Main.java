@@ -37,6 +37,7 @@ public class Main extends Application {
 
         layout = new Pane();
         layout.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+        Pigeon.setMaxPositions(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         String imagePathLeft = "file:resources/pigeon_left.gif";
         Image imageLeft = new Image(imagePathLeft);

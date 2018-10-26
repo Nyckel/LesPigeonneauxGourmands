@@ -11,6 +11,9 @@ public class Pigeon extends Thread {
     private static double imageShiftX;
     private static double imageShiftY;
     private static final int speed = 5;
+    private static int MAXPOSITIONX;
+    private static int MAXPOSITIONY;
+
 
     private int id;
     private double x;
@@ -39,6 +42,11 @@ public class Pigeon extends Thread {
         view.setY(y - imageShiftY);
         view.setFitHeight(imageLeft.getHeight());
         view.setPreserveRatio(true);
+    }
+
+    public static void setMaxPositions(int width, int height) {
+        MAXPOSITIONX = width;
+        MAXPOSITIONY = height;
     }
 
     public void run() {
@@ -115,9 +123,9 @@ public class Pigeon extends Thread {
         if (rock.getX() == x)
         {
             if (rock.getY() > y)
-                y -= speed;
+                y = Math.min(Math.max(0, y - speed), MAXPOSITIONY);
             else
-                y += speed;
+                y = Math.min(Math.max(0, y + speed), MAXPOSITIONY);
         }
         else {
             double angle = Math.atan((rock.getY()-y)/(rock.getX()-x));
@@ -128,8 +136,8 @@ public class Pigeon extends Thread {
                     directionLeft = true;
                     view.setImage(imageLeft);
                 }
-                x -= Math.cos(angle) * speed;
-                y -= Math.sin(angle) * speed;
+                x = Math.min(Math.max(0, x - Math.cos(angle) * speed), MAXPOSITIONX);
+                y = Math.min(Math.max(0, y - Math.sin(angle) * speed), MAXPOSITIONY);
             }
             else
             {
@@ -137,8 +145,8 @@ public class Pigeon extends Thread {
                     directionLeft = false;
                     view.setImage(imageRight);
                 }
-                x += Math.cos(angle) * speed;
-                y += Math.sin(angle) * speed;
+                x = Math.min(Math.max(0, x + Math.cos(angle) * speed), MAXPOSITIONX);
+                y = Math.min(Math.max(0, y + Math.sin(angle) * speed), MAXPOSITIONY);
             }
         }
     }
