@@ -1,9 +1,3 @@
-import com.sun.javafx.geom.BaseBounds;
-import com.sun.javafx.geom.transform.BaseTransform;
-import com.sun.javafx.jmx.MXNodeAlgorithm;
-import com.sun.javafx.jmx.MXNodeAlgorithmContext;
-import com.sun.javafx.sg.prism.NGNode;
-import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,7 +5,7 @@ import javafx.scene.image.ImageView;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Rock extends Node implements Runnable{
+public class Rock extends Node implements Runnable {
 
     private static Image image;
     private static double imageShiftX;
@@ -20,7 +14,7 @@ public class Rock extends Node implements Runnable{
     private double x, y;
     private int radius;
 
-    public Rock(double px, double py){
+    public Rock(double px, double py) {
         x = px;
         y = py;
         radius = 20;
@@ -30,13 +24,21 @@ public class Rock extends Node implements Runnable{
         view.setImage(image);
         view.setX(x - imageShiftX);
         view.setY(y - imageShiftY);
-        view.setFitHeight(image.getHeight()/2);
+        view.setFitHeight(image.getHeight() / 2);
         view.setPreserveRatio(true);
     }
 
-    public ImageView getView() {return view;}
-    public double getX() {return x;}
-    public double getY() {return y;}
+    public ImageView getView() {
+        return view;
+    }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
 
     public static void setImage(Image img) {
         image = img;
@@ -44,8 +46,8 @@ public class Rock extends Node implements Runnable{
         imageShiftY = img.getHeight() / 2;
     }
 
-    public synchronized void run(){
-        Thread r =new Thread(this);
+    public synchronized void run() {
+        Thread r = new Thread(this);
         fireEvent(new RockEvent(RockEvent.CREATION));
 
         Timer timer = new Timer();
@@ -56,25 +58,5 @@ public class Rock extends Node implements Runnable{
                 timer.cancel();
             }
         }, 3000);
-    }
-
-    @Override
-    protected NGNode impl_createPeer() {
-        return null;
-    }
-
-    @Override
-    public BaseBounds impl_computeGeomBounds(BaseBounds bounds, BaseTransform tx) {
-        return null;
-    }
-
-    @Override
-    protected boolean impl_computeContains(double localX, double localY) {
-        return false;
-    }
-
-    @Override
-    public Object impl_processMXNode(MXNodeAlgorithm alg, MXNodeAlgorithmContext ctx) {
-        return null;
     }
 }

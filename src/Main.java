@@ -3,6 +3,7 @@ import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -19,9 +20,9 @@ public class Main extends Application {
 
     private final static int WINDOW_WIDTH = 500;
     private final static int WINDOW_HEIGHT = 500;
-    private final Object lockMonitor = new Object();
     private ArrayList<Pigeon> pigeons;
     private ArrayList<Food> foods;
+    private Pane layout;
     private ArrayList<Rock> rocks;
 
     public Main() {
@@ -34,14 +35,14 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         primaryStage.setTitle("Les Pigeonnaux Gourmands");
 
-        Pane layout = new Pane();
+        layout = new Pane();
         layout.setPrefSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 
         String imagePathLeft = "file:resources/pigeon_left.gif";
         Image imageLeft = new Image(imagePathLeft);
         String imagePathRight = "file:resources/pigeon_right.gif";
         Image imageRight = new Image(imagePathRight);
-        Pigeon.setImage(imageLeft, imageRight);
+        Pigeon.setImages(imageLeft, imageRight);
 
         String imagePathFood = "file:resources/food.gif";
         Image imageFood = new Image(imagePathFood);
@@ -79,11 +80,9 @@ public class Main extends Application {
 
         primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
             public void handle(WindowEvent we) {
-                synchronized (lockMonitor) {
-                    System.out.println("Stage is closing");
-                    for (Pigeon pig : pigeons) {
-                        pig.stopRunning();
-                    }
+                System.out.println("Stage is closing");
+                for (Pigeon pig : pigeons) {
+                    pig.stopRunning();
                 }
             }
         });
@@ -93,57 +92,65 @@ public class Main extends Application {
     }
 
 
-    private void addPigeon(Pane layout, int x, int y) {
+    private synchronized void addPigeon(Pane layout, int x, int y) {
         Pigeon pig = new Pigeon(x, y);
-
-        synchronized (lockMonitor) {
-            for (Food f: foods) {
-                if (f.isFresh())
-                    pig.notifyFoodPop(f);
-            }
-
-            layout.getChildren().add(pig.getView());
-            pig.start();
-            pigeons.add(pig);
+        for (Food f: foods) {
+            if (f.isFresh())
+                pig.notifyFoodPop(f);
         }
+        addToLayout(pig.getView());
+        pig.start();
+        pigeons.add(pig);
     }
 
-    private void addFood(Pane layout, int x, int y) {
+    private synchronized void addFood(Pane layout, int x, int y) {
         Food f = new Food(x, y);
-        layout.getChildren().add(f.getView());
-        synchronized (lockMonitor) {
+        addToLayout(f.getView());
 
-            f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
-                @Override
-                public void handle(FoodEvent fe) {
-                    Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
-                        @Override public void run() {
-                            layout.getChildren().remove(f.getView());
-                            for (Pigeon p : pigeons) {
-                                p.notifyFoodEaten(f.getFoodId());
-                            }
-                        }
-                    });
-                }
-            });
-
-            f.addEventHandler(FoodEvent.FOOD_OUTDATED, new EventHandler<FoodEvent>() {
-                @Override
-                public void handle(FoodEvent fe) {
-                    for (Pigeon p : pigeons) {
-                        p.notifyFoodOutdated(f.getFoodId());
+        f.addEventHandler(FoodEvent.FOOD_EATEN, new EventHandler<FoodEvent>() {
+            @Override
+            public void handle(FoodEvent fe) {
+                Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
+                    @Override public void run() {
+                        removeFromLayout(f.getView());
+                        notifyFoodEaten(f);
+                        foods.remove(f);
                     }
-                }
-            });
-            
-            foods.add(f);
-            for (Pigeon p : pigeons) {
-                p.notifyFoodPop(f);
+                });
             }
+        });
+
+        f.addEventHandler(FoodEvent.FOOD_OUTDATED, new EventHandler<FoodEvent>() {
+            @Override
+            public void handle(FoodEvent fe) {
+                notifyFoodOutdated(f.getFoodId());
+                foods.remove(f);
+            }
+        });
+        foods.add(f);
+        notifyFoodPop(f);
+
+    }
+
+    private synchronized void notifyFoodEaten(Food f) {
+        for (Pigeon p : pigeons) {
+            p.notifyFoodEaten(f.getFoodId());
         }
     }
 
-    private void addRock(Pane layout)
+    private synchronized void notifyFoodOutdated(int foodId) {
+        for (Pigeon p : pigeons) {
+            p.notifyFoodOutdated(foodId);
+        }
+    }
+
+    private synchronized void notifyFoodPop(Food f) {
+        for (Pigeon p : pigeons) {
+            p.notifyFoodPop(f);
+        }
+    }
+
+    private synchronized void addRock(Pane layout)
     {
         double x = randomNumberInRange(10, 490);
         double y = randomNumberInRange(10, 490);
@@ -154,7 +161,7 @@ public class Main extends Application {
             @Override
             public void handle(RockEvent rc) {
                 System.out.println("Affichage du rock");
-                layout.getChildren().add(rock.getView());
+                addToLayout(rock.getView());
                 rocks.add(rock);
             }
         });
@@ -171,6 +178,22 @@ public class Main extends Application {
         });
 
         rock.run(); // lancement du thread
+    }
+
+    private synchronized void addToLayout(ImageView view) {
+        Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
+            @Override public void run() {
+                layout.getChildren().add(view);
+            }
+        });
+    }
+
+    private synchronized void removeFromLayout(ImageView view) {
+        Platform.runLater(new Runnable() { // Need to move back to main javafx thread in order to change UI
+            @Override public void run() {
+                layout.getChildren().remove(view);
+            }
+        });
     }
 
     private static int randomNumberInRange(int min, int max) {

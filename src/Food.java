@@ -16,6 +16,8 @@ public class Food extends Node {
     private int x;
     private int y;
     private boolean fresh;
+    private boolean eaten;
+    private boolean discoveredOutdated;
     private ImageView view;
 
     public Food(int px, int py) {
@@ -23,6 +25,8 @@ public class Food extends Node {
         x = px;
         y = py;
         fresh = true;
+        eaten = false;
+        discoveredOutdated = false;
 
         System.out.println("Creating food at position " + px + ";" + py);
 
@@ -58,7 +62,6 @@ public class Food extends Node {
             view.setX(x - imageOutdatedShiftX);
             view.setY(y - imageOutdatedShiftY);
             view.setFitHeight(imageOutdated.getHeight()/2);
-            getOutdated();
         }
     }
 
@@ -78,9 +81,17 @@ public class Food extends Node {
         imageOutdatedShiftY = imgO.getHeight() / 4;
     }
     public synchronized void getEaten(int pigeonId) {
+        if (eaten) return;
+
+//        System.out.println("Food_" + id + this + " eaten by " + pigeonId);
+        eaten = true;
         fireEvent(new FoodEvent(FoodEvent.FOOD_EATEN, pigeonId));
     }
     public synchronized void getOutdated() {
+        if (discoveredOutdated) return;
+
+//        System.out.println("Food_" + id + this + " rotten");
+        discoveredOutdated = true;
         fireEvent(new FoodEvent(FoodEvent.FOOD_OUTDATED));
     }
 }
