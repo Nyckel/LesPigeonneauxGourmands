@@ -70,8 +70,8 @@ public class Main extends Application {
             @Override
             public void handle(KeyEvent event) {
                 if (event.getCode() == KeyCode.SPACE) {
-                    if (!(rocks.size() < 2))
-                        System.out.println("Two rocks are already on the screen");
+                    if (rocks.size() != 0)
+                        System.out.println("One rock are already on the screen");
                     else
                         addRock(layout);
                 }
@@ -163,6 +163,9 @@ public class Main extends Application {
                 System.out.println("Affichage du rock");
                 addToLayout(rock.getView());
                 rocks.add(rock);
+                for (Pigeon p : pigeons) {
+                    p.notifyNewRock(rock);
+                }
             }
         });
 
@@ -174,6 +177,9 @@ public class Main extends Application {
                     layout.getChildren().remove(rock.getView());
                 });
                 rocks.remove(rock);
+                for (Pigeon p : pigeons) {
+                    p.notifyClearRock();
+                }
             }
         });
 

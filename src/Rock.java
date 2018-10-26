@@ -10,14 +10,14 @@ public class Rock extends Node implements Runnable {
     private static Image image;
     private static double imageShiftX;
     private static double imageShiftY;
+    private static double radius = 200;
+
     private ImageView view;
     private double x, y;
-    private int radius;
 
     public Rock(double px, double py) {
         x = px;
         y = py;
-        radius = 20;
         System.out.println("Creating rock at position " + px + ";" + py + "/" + x + " ; " + y);
 
         view = new ImageView();
@@ -40,6 +40,10 @@ public class Rock extends Node implements Runnable {
         return y;
     }
 
+    public double getRadius() {
+        return radius;
+    }
+
     public static void setImage(Image img) {
         image = img;
         imageShiftX = img.getWidth() / 2;
@@ -57,6 +61,6 @@ public class Rock extends Node implements Runnable {
                 fireEvent(new RockEvent(RockEvent.TIMEOUT));
                 timer.cancel();
             }
-        }, 3000);
+        }, 1000);
     }
 }

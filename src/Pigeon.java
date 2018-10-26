@@ -20,9 +20,11 @@ public class Pigeon extends Thread {
     private ArrayList<Food> foods;
     private Food currentObjective;
     private boolean directionLeft;
+    private Rock rock;
 
     public Pigeon(double px, double py) {
         id = incrementId++;
+        rock = null;
         x = px;
         y = py;
         shouldRun = true;
@@ -43,7 +45,11 @@ public class Pigeon extends Thread {
         while(shouldRun) {
             // Check for danger
 
-            if (currentObjective != null)
+            if ((rock != null) && (Math.sqrt(Math.pow(x - rock.getX(), 2) + Math.pow(y - rock.getY(), 2)) <= rock.getRadius())) {
+                runAwayFromRock();
+                updateViewPosition();
+            }
+            else if (currentObjective != null)
             {
 //                System.out.println("Pigeon " + id + " alive at " + x + " ; " + y);
 //                System.out.println("Objective at " + currentObjective.getX() + " ; " + currentObjective.getY());
@@ -101,6 +107,38 @@ public class Pigeon extends Thread {
                     x -= Math.cos(angle) * speed;
                     y -= Math.sin(angle) * speed;
                 }
+            }
+        }
+    }
+
+    private void runAwayFromRock() {
+        if (rock.getX() == x)
+        {
+            if (rock.getY() > y)
+                y -= speed;
+            else
+                y += speed;
+        }
+        else {
+            double angle = Math.atan((rock.getY()-y)/(rock.getX()-x));
+
+            if (rock.getX() > x)
+            {
+                if (! directionLeft) {
+                    directionLeft = true;
+                    view.setImage(imageLeft);
+                }
+                x -= Math.cos(angle) * speed;
+                y -= Math.sin(angle) * speed;
+            }
+            else
+            {
+                if (directionLeft) {
+                    directionLeft = false;
+                    view.setImage(imageRight);
+                }
+                x += Math.cos(angle) * speed;
+                y += Math.sin(angle) * speed;
             }
         }
     }
@@ -170,5 +208,13 @@ public class Pigeon extends Thread {
             System.out.println(foods.size());
         }
 
+    }
+
+    public synchronized void notifyNewRock(Rock ro) {
+        rock = ro;
+    }
+
+    public synchronized void notifyClearRock() {
+        rock = null;
     }
 }
