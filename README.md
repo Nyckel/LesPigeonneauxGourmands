@@ -14,10 +14,12 @@ The project simulates the behaviour of pigeons on a public place. They will get 
 
 **`Right click`** Add food to the square
 
-**`Space bar`** Add a rock to scare de pigeon
+**`Space bar`** Add a rock to scare de pigeon (only one at a time)
 
 ## Codes Permanents
 
 Poisson Clément - POIC28029605
+
 Kévin Aupée - AUPK21029808
+
 Mathis Ouarnier - OUAM19119602
